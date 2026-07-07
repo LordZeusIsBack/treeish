@@ -2,6 +2,7 @@ import argparse
 import os
 import subprocess
 import sys
+import json
 
 
 DEFAULT_IGNORE = {
@@ -114,6 +115,10 @@ def parse_args():
         "--no-git", action="store_true",
         help="Don't consult git; only apply the built-in ignore list",
     )
+    parser.add_argument(
+        "--json", action ="store_true",
+        help="Output the tree as JSON instead of the pretty format",
+    )
     return parser.parse_args()
 
 
@@ -134,11 +139,15 @@ def main():
         if git_root is not None:
             tracked = git_tracked_paths(git_root)
 
+    tree = build_tree(root, show_all=args.all, tracked=tracked)
+
+    if args.json:
+        print(json.dumps(tree, indent=2))
+        return
+
     label = os.path.basename(root) or root
     if not label.endswith("/"):
         label += "/"
-
-    tree = build_tree(root, show_all=args.all, tracked=tracked)
     print(label)
     print_tree(tree)
 
