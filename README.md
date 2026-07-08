@@ -107,6 +107,16 @@ Get the structure as JSON, ready for a script or LLM to parse:
 treeish --json
 ```
 
+```json
+{
+  "README.md": null,
+  "src": {
+    "main.py": null,
+    "utils.py": null
+  }
+}
+```
+
 ## Behavior notes
 
 - **Git-aware means tracked-only.** Inside a repo, a brand-new file you haven't `git add`ed yet won't appear. That's intentional — use `--no-git` if you want to see untracked files.

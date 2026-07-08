@@ -116,7 +116,7 @@ def parse_args():
         help="Don't consult git; only apply the built-in ignore list",
     )
     parser.add_argument(
-        "--json", action ="store_true",
+        "--json", action="store_true",
         help="Output the tree as JSON instead of the pretty format",
     )
     return parser.parse_args()
@@ -142,7 +142,7 @@ def main():
     tree = build_tree(root, show_all=args.all, tracked=tracked)
 
     if args.json:
-        print(json.dumps(tree, indent=2))
+        print(json.dumps(tree, indent=2 , sort_keys=True))
         return
 
     label = os.path.basename(root) or root
