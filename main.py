@@ -15,6 +15,11 @@ DEFAULT_IGNORE = {
 }
 
 
+def canon(path):
+    """Canonical key for comparing paths that come from different sources."""
+    return os.path.normcase(os.path.normpath(path))
+
+
 def find_git_root(path):
     """Return the repo root if `path` is inside a git work tree, else None."""
     try:
