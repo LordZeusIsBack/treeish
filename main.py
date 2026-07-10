@@ -70,7 +70,7 @@ def count_lines(path):
             if b"\x00" in first:
                 return None
             count = first.count(b"\n")
-            last = first 
+            last = first
             while True:
                 block = f.read(65536)
                 if not block:
