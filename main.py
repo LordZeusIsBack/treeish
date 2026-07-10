@@ -16,7 +16,14 @@ DEFAULT_IGNORE = {
 
 
 def canon(path):
-    """Canonical key for comparing paths that come from different sources."""
+    """Normalize a path for consistent comparisons across sources.
+    
+    Parameters:
+        path: The path to normalize.
+    
+    Returns:
+        The normalized, case-adjusted path.
+    """
     return os.path.normcase(os.path.normpath(path))
 
 
@@ -92,14 +99,17 @@ def count_lines(path):
 
 def build_tree(root, show_all, tracked , with_stats=False):
     """
-    Recursively build a nested-dict representation of `root`.
-
-    Directories -> dict of contents (possibly {}). Files -> None.
-    Symlinks are listed but never followed, so a symlink loop can't
-    cause infinite recursion.
-
-    `tracked` is either None (no git filtering) or a set of absolute
-    paths that git tracks; entries not in the set are skipped.
+    Recursively build a nested dictionary representing a directory tree.
+    
+    Parameters:
+        root: Directory to scan.
+        show_all: Whether to include entries in the default ignore list.
+        tracked: Canonical paths to include, or None to disable path filtering.
+        with_stats: Whether file values should contain line counts instead of None.
+    
+    Returns:
+        A nested dictionary of directory contents. Directory values are dictionaries;
+        file values are line counts when statistics are enabled, otherwise None.
     """
     node = {}
     try:
@@ -154,6 +164,11 @@ def parse_args():
 
 
 def main():
+    """
+    Run the directory tree command using the parsed command-line options.
+    
+    Exits with status 1 when the target path does not exist or is not a directory.
+    """
     args = parse_args()
     root = os.path.realpath(os.path.expanduser(args.path))
 
