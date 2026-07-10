@@ -107,7 +107,7 @@ def build_tree(root, show_all, tracked , with_stats=False):
             for entry in entries:
                 if not show_all and entry.name in DEFAULT_IGNORE:
                     continue
-                if tracked is not None and entry.path not in tracked:
+                if tracked is not None and canon(entry.path) not in tracked:
                     continue
                 if entry.is_dir(follow_symlinks=False):
                     node[entry.name] = build_tree(entry.path, show_all, tracked, with_stats)
