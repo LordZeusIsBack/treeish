@@ -65,7 +65,7 @@ treeish --path .
 ## Usage
 
 ```sh
-treeish [--path PATH] [--all] [--no-git]
+treeish [--path PATH] [--all] [--no-git] [--json]
 ```
 
 | Flag | Description |
@@ -73,6 +73,7 @@ treeish [--path PATH] [--all] [--no-git]
 | `--path`, `-p` | Folder whose tree to print. Defaults to the current directory. |
 | `--all`, `-a` | Show everything: disable both the built-in ignore list and git filtering. |
 | `--no-git` | Skip git entirely; apply only the built-in ignore list. |
+| `--json` | Output the tree as JSON instead of the pretty box-drawing format. Handy for feeding structure to a program or LLM. |
 
 ### Examples
 
@@ -98,6 +99,22 @@ See absolutely everything, filters off:
 
 ```sh
 treeish --all
+```
+
+Get the structure as JSON, ready for a script or LLM to parse:
+
+```sh
+treeish --json
+```
+
+```json
+{
+  "README.md": null,
+  "src": {
+    "main.py": null,
+    "utils.py": null
+  }
+}
 ```
 
 ## Behavior notes

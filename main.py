@@ -2,6 +2,7 @@ import argparse
 import os
 import subprocess
 import sys
+import json
 
 
 DEFAULT_IGNORE = {
@@ -57,8 +58,32 @@ def git_tracked_paths(root):
             parent = new_parent
     return tracked
 
+def count_lines(path):
+    """Line count for a text file, or None if it's binary/unreadable.
 
-def build_tree(root, show_all, tracked):
+    Reads in binary and counts newline bytes so no encoding can crash it.
+    A NUL byte in the first chunk means "binary" -> None (skip it).
+    """
+    try:
+        with open(path, "rb") as f:
+            first = f.read(65536)
+            if b"\x00" in first:
+                return None
+            count = first.count(b"\n")
+            last = first 
+            while True:
+                block = f.read(65536)
+                if not block:
+                    break
+                count += block.count(b"\n")
+                last = block
+            if last and not last.endswith(b"\n"):
+                count += 1 # count a final line with no trailing newline
+            return count
+    except OSError:
+        return None
+
+def build_tree(root, show_all, tracked , with_stats=False):
     """
     Recursively build a nested-dict representation of `root`.
 
@@ -78,9 +103,9 @@ def build_tree(root, show_all, tracked):
                 if tracked is not None and entry.path not in tracked:
                     continue
                 if entry.is_dir(follow_symlinks=False):
-                    node[entry.name] = build_tree(entry.path, show_all, tracked)
+                    node[entry.name] = build_tree(entry.path, show_all, tracked, with_stats)
                 else:
-                    node[entry.name] = None
+                    node[entry.name] = count_lines(entry.path) if with_stats else None
     except OSError as e:
         print(f"warning: skipping {root!r}: {e.strerror}", file=sys.stderr)
     return node
@@ -114,6 +139,10 @@ def parse_args():
         "--no-git", action="store_true",
         help="Don't consult git; only apply the built-in ignore list",
     )
+    parser.add_argument(
+        "--json", action="store_true",
+        help="Output the tree as JSON instead of the pretty format",
+    )
     return parser.parse_args()
 
 
@@ -134,11 +163,15 @@ def main():
         if git_root is not None:
             tracked = git_tracked_paths(git_root)
 
+    tree = build_tree(root, show_all=args.all, tracked=tracked, with_stats=args.json)
+
+    if args.json:
+        print(json.dumps(tree, indent=2 , sort_keys=True))
+        return
+
     label = os.path.basename(root) or root
     if not label.endswith("/"):
         label += "/"
-
-    tree = build_tree(root, show_all=args.all, tracked=tracked)
     print(label)
     print_tree(tree)
 
