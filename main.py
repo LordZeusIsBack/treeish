@@ -47,15 +47,17 @@ def git_tracked_paths(root):
         capture_output=True, text=True, check=False,
     )
     tracked = set()
+    root_key = canon(root)
     for rel in result.stdout.split("\0"):
         if not rel:
             continue
         abs_path = os.path.join(root, rel)
-        tracked.add(abs_path)
+        tracked.add(canon(abs_path))
         parent = os.path.dirname(abs_path)
         while True:
-            tracked.add(parent)
-            if os.path.normpath(parent) == os.path.normpath(root):
+            parent_key = canon(parent)
+            tracked.add(parent_key)
+            if parent_key == root_key:
                 break
             new_parent = os.path.dirname(parent)
             if new_parent == parent:
