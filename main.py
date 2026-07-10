@@ -148,7 +148,7 @@ def parse_args():
 
 def main():
     args = parse_args()
-    root = os.path.abspath(os.path.expanduser(args.path))
+    root = os.path.realpath(os.path.expanduser(args.path))
 
     if not os.path.exists(root):
         print(f"Error: no such file or directory: {args.path}", file=sys.stderr)
