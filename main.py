@@ -121,8 +121,10 @@ def build_tree(root, show_all, tracked , with_stats=False):
                     continue
                 if entry.is_dir(follow_symlinks=False):
                     node[entry.name] = build_tree(entry.path, show_all, tracked, with_stats)
-                else:
+                elif entry.is_file(follow_symlinks=False):
                     node[entry.name] = count_lines(entry.path) if with_stats else None
+                else:
+                    node[entry.name] = None
     except OSError as e:
         print(f"warning: skipping {root!r}: {e.strerror}", file=sys.stderr)
     return node
