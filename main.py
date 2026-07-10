@@ -36,7 +36,7 @@ def find_git_root(path):
 
 def git_tracked_paths(root):
     """
-    Return a set of absolute paths that git tracks under `root`.
+    Return a set of canonical paths that git tracks under `root`.
 
     Both the tracked files themselves and every ancestor directory are
     included, so an interior directory that only contains tracked files
