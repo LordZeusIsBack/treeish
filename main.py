@@ -15,6 +15,11 @@ DEFAULT_IGNORE = {
 }
 
 
+def canon(path):
+    """Canonical key for comparing paths that come from different sources."""
+    return os.path.normcase(os.path.normpath(path))
+
+
 def find_git_root(path):
     """Return the repo root if `path` is inside a git work tree, else None."""
     try:
@@ -31,7 +36,7 @@ def find_git_root(path):
 
 def git_tracked_paths(root):
     """
-    Return a set of absolute paths that git tracks under `root`.
+    Return a set of canonical paths that git tracks under `root`.
 
     Both the tracked files themselves and every ancestor directory are
     included, so an interior directory that only contains tracked files
@@ -42,15 +47,17 @@ def git_tracked_paths(root):
         capture_output=True, text=True, check=False,
     )
     tracked = set()
+    root_key = canon(root)
     for rel in result.stdout.split("\0"):
         if not rel:
             continue
         abs_path = os.path.join(root, rel)
-        tracked.add(abs_path)
+        tracked.add(canon(abs_path))
         parent = os.path.dirname(abs_path)
         while True:
-            tracked.add(parent)
-            if os.path.normpath(parent) == os.path.normpath(root):
+            parent_key = canon(parent)
+            tracked.add(parent_key)
+            if parent_key == root_key:
                 break
             new_parent = os.path.dirname(parent)
             if new_parent == parent:
@@ -100,7 +107,7 @@ def build_tree(root, show_all, tracked , with_stats=False):
             for entry in entries:
                 if not show_all and entry.name in DEFAULT_IGNORE:
                     continue
-                if tracked is not None and entry.path not in tracked:
+                if tracked is not None and canon(entry.path) not in tracked:
                     continue
                 if entry.is_dir(follow_symlinks=False):
                     node[entry.name] = build_tree(entry.path, show_all, tracked, with_stats)
@@ -148,7 +155,7 @@ def parse_args():
 
 def main():
     args = parse_args()
-    root = os.path.abspath(os.path.expanduser(args.path))
+    root = os.path.realpath(os.path.expanduser(args.path))
 
     if not os.path.exists(root):
         print(f"Error: no such file or directory: {args.path}", file=sys.stderr)
